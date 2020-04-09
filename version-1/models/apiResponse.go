@@ -1,7 +1,7 @@
 package models
 
-// apiResponse is the response obtained from the 3rd party API
-type apiResponse struct {
+// APIResponse is the response obtained from the 3rd party API
+type APIResponse struct {
 	City       string    `json:"name"`
 	Coord      coordData `json:"coord"`
 	Clouds     cloudData `json:"clouds"`
@@ -12,7 +12,7 @@ type apiResponse struct {
 	Message    string    `json:"message"`
 }
 
-// Nested structs for the apiResponse
+// Nested structs for the APIResponse
 type coordData struct {
 	Lat float32 `json:"lat"`
 	Lon float32 `json:"lon"`
@@ -32,10 +32,4 @@ type sysData struct {
 }
 type cloudData struct {
 	Cloudiness int `json:"all"`
-}
-
-// APIError is the error returned to the user
-type APIError struct {
-	StatusCode int    `json:"status_code"`
-	Message    string `json:"message"`
 }
