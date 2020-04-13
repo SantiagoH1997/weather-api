@@ -32,6 +32,14 @@ func NewNotFound(message string) *APIError {
 	}
 }
 
+// NewBadRequest returns an APIError with a 400 status code and a message
+func NewBadRequest(message string) *APIError {
+	return &APIError{
+		http.StatusBadRequest,
+		message,
+	}
+}
+
 // NewApiError returns a custom APIError
 func NewAPIError(statusCode int, message string) *APIError {
 	return &APIError{
