@@ -11,6 +11,14 @@ import (
 // WeatherController connects the request with the model
 type WeatherController struct {
 	beego.Controller
+	Service *services.WeatherService
+}
+
+// NewWeatherController returns a pointer to a WeatherController
+func NewWeatherController(ws *services.WeatherService) *WeatherController {
+	return &WeatherController{
+		Service: ws,
+	}
 }
 
 // Get takes a city and a country and
@@ -23,10 +31,9 @@ func (wc *WeatherController) Get() {
 		wc.Ctx.Output.SetStatus(err.StatusCode)
 		wc.Data["json"] = err
 		wc.ServeJSON()
+		return
 	}
-
-	var ws services.WeatherService
-	weather, apiErr := ws.Get(req.City, req.Country)
+	weather, apiErr := wc.Service.Get(req.City, req.Country)
 	if apiErr != nil {
 		wc.Ctx.Output.SetStatus(apiErr.StatusCode)
 		wc.Data["json"] = apiErr

@@ -23,6 +23,7 @@ func (wc *WeatherController) Get() {
 		wc.Ctx.Output.SetStatus(err.StatusCode)
 		wc.Data["json"] = err
 		wc.ServeJSON()
+		return
 	}
 
 	var ws services.WeatherService
