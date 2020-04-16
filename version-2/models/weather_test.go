@@ -8,18 +8,24 @@ import (
 	"testing"
 
 	"github.com/santiagoh1997/weather-api/version-2/models"
-	. "github.com/smartystreets/goconvey/convey"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-const (
-	testLocationName = "Bogotá, CO"
-	testTemperature  = "292.15 °C"
-	testWind         = "3.6 m/s"
-	testCloudiness   = "75%"
-	testPressure     = "1026 hpa"
-	testHumidity     = "52%"
-	testSunrise      = "07:53"
-	testSunset       = "08:04"
+var (
+	id          primitive.ObjectID
+	dateTime    primitive.DateTime
+	testWeather = &models.Weather{
+		LocationName:   "Bogotá, CO",
+		Temperature:    "292.15 °C",
+		Wind:           "3.6 m/s",
+		Cloudiness:     "75%",
+		Pressure:       "1026 hpa",
+		Humidity:       "52%",
+		Sunrise:        "07:53",
+		Sunset:         "08:04",
+		GeoCoordinates: []float32{4.61, -74.08},
+		RequestedTime:  "",
+	}
 )
 
 func TestNewFromResponse(t *testing.T) {
@@ -40,18 +46,29 @@ func TestNewFromResponse(t *testing.T) {
 	if err := json.Unmarshal([]byte(data), &apiRes); err != nil {
 		panic(err)
 	}
+	got := models.NewWeatherFromResponse(&apiRes)
 
-	Convey("Given an API response", t, func() {
-		Convey("It should return a new Weather struct with the correct fields", func() {
-			w := models.NewWeatherFromResponse(&apiRes)
-			So(w.LocationName, ShouldEqual, testLocationName)
-			So(w.Temperature, ShouldEqual, testTemperature)
-			So(w.Wind, ShouldEqual, testWind)
-			So(w.Cloudiness, ShouldEqual, testCloudiness)
-			So(w.Pressure, ShouldEqual, testPressure)
-			So(w.Humidity, ShouldEqual, testHumidity)
-			So(w.Sunrise, ShouldEqual, testSunrise)
-			So(w.Sunset, ShouldEqual, testSunset)
+	tests := []struct {
+		name string
+		got  interface{}
+		want interface{}
+	}{
+		{"LocationName", got.LocationName, testWeather.LocationName},
+		{"Temperature", got.Temperature, testWeather.Temperature},
+		{"Wind", got.Wind, testWeather.Wind},
+		{"Cloudiness", got.Cloudiness, testWeather.Cloudiness},
+		{"Pressure", got.Pressure, testWeather.Pressure},
+		{"Humidity", got.Humidity, testWeather.Humidity},
+		{"Sunrise", got.Sunrise, testWeather.Sunrise},
+		{"Sunset", got.Sunset, testWeather.Sunset},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.got != tt.want {
+				t.Errorf("NewFromResponse %s got %v want %v", tt.name, tt.got, tt.want)
+			}
 		})
-	})
+	}
+
 }
