@@ -14,6 +14,7 @@ import (
 )
 
 func main() {
+	l := logger.NewLogger()
 	// DB config
 	var mongoURI string
 	if beego.BConfig.RunMode != "prod" {
@@ -21,14 +22,14 @@ func main() {
 	}
 	db, close, err := db.Open(mongoURI, beego.AppConfig.String("mongoDBName"))
 	if err != nil {
-		logger.Log.Error("Error while connecting to the DB")
+		l.Error("Error while connecting to the DB")
 		panic(err)
 	}
 	defer close(context.Background())
-	logger.Log.Info("Connected to the DB")
+	l.Info("Connected to the DB")
 
 	// Services config
-	ws := services.NewWeatherService(db)
+	ws := services.NewWeatherService(db, l)
 	// Controllers config
 	wc := controllers.NewWeatherController(ws)
 
@@ -39,6 +40,6 @@ func main() {
 		beego.BConfig.WebConfig.DirectoryIndex = true
 		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
 	}
-	defer logger.Log.Sync()
+	defer l.Sync()
 	beego.Run()
 }

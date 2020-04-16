@@ -2,8 +2,6 @@ package utils
 
 import (
 	"net/http"
-
-	"github.com/santiagoh1997/weather-api/version-2/logger"
 )
 
 const internalServerErrorMessage = "Internal server error"
@@ -14,10 +12,9 @@ type APIError struct {
 	Message    string `json:"message"`
 }
 
-// NewInternalServerError logs an error and
-// returns an APIError with a 500 status code and a message
-func NewInternalServerError(logError string) *APIError {
-	logger.Log.Errorf(logError)
+// NewInternalServerError returns an APIError
+// with a 500 status code and a message
+func NewInternalServerError() *APIError {
 	return &APIError{
 		http.StatusInternalServerError,
 		internalServerErrorMessage,

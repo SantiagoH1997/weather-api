@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/astaxie/beego"
 	"github.com/santiagoh1997/weather-api/version-2/models"
 	"github.com/santiagoh1997/weather-api/version-2/utils"
@@ -33,12 +35,14 @@ func init() {
 // WeatherService is the middleman between the controller and the model
 type WeatherService struct {
 	Database *mongo.Database
+	logger   *zap.SugaredLogger
 }
 
 // NewWeatherService returns a pointer to a WeatherService
-func NewWeatherService(db *mongo.Database) *WeatherService {
+func NewWeatherService(db *mongo.Database, l *zap.SugaredLogger) *WeatherService {
 	return &WeatherService{
 		db,
+		l,
 	}
 }
 
@@ -91,7 +95,8 @@ func (ws *WeatherService) GetByLocation(location string) (*models.Weather, *util
 		if err == mongo.ErrNoDocuments || w.Score < minimumTextScore {
 			return nil, utils.NewNotFound("No results found")
 		}
-		return nil, utils.NewInternalServerError(fmt.Sprintf("Error while retrieving weather: %s", err.Error()))
+		ws.logger.Error(fmt.Sprintf("Error while retrieving weather: %s", err.Error()))
+		return nil, utils.NewInternalServerError()
 	}
 	return &w, nil
 }
@@ -103,7 +108,8 @@ func (ws *WeatherService) Save(w *models.Weather) *utils.APIError {
 	defer cancel()
 	_, err := ws.Database.Collection(collection).InsertOne(ctx, w)
 	if err != nil {
-		return utils.NewInternalServerError(fmt.Sprintf("Error while saving weather: %s", err.Error()))
+		ws.logger.Error(fmt.Sprintf("Error while saving weather: %s", err.Error()))
+		return utils.NewInternalServerError()
 	}
 	return nil
 }
@@ -121,7 +127,8 @@ func (ws *WeatherService) Update(w *models.Weather) *utils.APIError {
 	}
 	_, err := ws.Database.Collection(collection).UpdateOne(ctx, filter, update)
 	if err != nil {
-		return utils.NewInternalServerError(fmt.Sprintf("Error while updating weather: %s", err.Error()))
+		ws.logger.Error(fmt.Sprintf("Error while updating weather: %s", err.Error()))
+		return utils.NewInternalServerError()
 	}
 	return nil
 }
@@ -130,8 +137,8 @@ func (ws *WeatherService) Update(w *models.Weather) *utils.APIError {
 func (ws *WeatherService) fetchWeather(url string) (*models.APIResponse, *utils.APIError) {
 	res, err := http.Get(url)
 	if err != nil {
-		logErr := fmt.Sprintf("Error while fetching weather: %s", err.Error())
-		return nil, utils.NewInternalServerError(logErr)
+		ws.logger.Error(fmt.Sprintf("Error while fetching weather: %s", err.Error()))
+		return nil, utils.NewInternalServerError()
 	}
 	defer res.Body.Close()
 	var apiRes models.APIResponse
@@ -139,8 +146,8 @@ func (ws *WeatherService) fetchWeather(url string) (*models.APIResponse, *utils.
 	if apiRes.StatusCode != "" {
 		statusCode, err := strconv.Atoi(apiRes.StatusCode)
 		if err != nil {
-			logErr := fmt.Sprintf("Error while converting status code: %s", err.Error())
-			return nil, utils.NewInternalServerError(logErr)
+			ws.logger.Error(fmt.Sprintf("Error while converting status code: %s", err.Error()))
+			return nil, utils.NewInternalServerError()
 		}
 		return nil, utils.NewAPIError(statusCode, apiRes.Message)
 	}
