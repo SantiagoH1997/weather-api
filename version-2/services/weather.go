@@ -102,20 +102,20 @@ func (ws *WeatherService) GetByLocation(location string) (*models.Weather, *util
 }
 
 // Save saves a weather response to the database
-func (ws *WeatherService) Save(w *models.Weather) *utils.APIError {
+func (ws *WeatherService) Save(w *models.Weather) (*mongo.InsertOneResult, *utils.APIError) {
 	w.ModifiedAt = primitive.NewDateTimeFromTime(time.Now())
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
-	_, err := ws.Database.Collection(collection).InsertOne(ctx, w)
+	res, err := ws.Database.Collection(collection).InsertOne(ctx, w)
 	if err != nil {
 		ws.logger.Error(fmt.Sprintf("Error while saving weather: %s", err.Error()))
-		return utils.NewInternalServerError()
+		return nil, utils.NewInternalServerError()
 	}
-	return nil
+	return res, nil
 }
 
 // Update updates an existing weather in the database
-func (ws *WeatherService) Update(w *models.Weather) *utils.APIError {
+func (ws *WeatherService) Update(w *models.Weather) (*mongo.UpdateResult, *utils.APIError) {
 	w.ModifiedAt = primitive.NewDateTimeFromTime(time.Now())
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
@@ -125,12 +125,12 @@ func (ws *WeatherService) Update(w *models.Weather) *utils.APIError {
 	update := bson.M{
 		"$set": w,
 	}
-	_, err := ws.Database.Collection(collection).UpdateOne(ctx, filter, update)
+	res, err := ws.Database.Collection(collection).UpdateOne(ctx, filter, update)
 	if err != nil {
 		ws.logger.Error(fmt.Sprintf("Error while updating weather: %s", err.Error()))
-		return utils.NewInternalServerError()
+		return nil, utils.NewInternalServerError()
 	}
-	return nil
+	return res, nil
 }
 
 // fetchWeather fetches a weather report from the API

@@ -1,41 +1,123 @@
-package services
+package services_test
 
 import (
-	"os"
-	"path/filepath"
+	"context"
 	"testing"
 
-	"github.com/astaxie/beego"
-	. "github.com/smartystreets/goconvey/convey"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/santiagoh1997/weather-api/version-2/services"
+	"github.com/santiagoh1997/weather-api/version-2/testdata"
 )
 
-const (
-	testCity         = "Bogota"
-	testCountry      = "co"
-	testLocationName = "Bogotá, CO"
-)
-
-func init() {
-	pwd, err := os.Getwd()
+func TestNewWeatherService(t *testing.T) {
+	db, teardown, err := setup()
 	if err != nil {
 		panic(err)
 	}
-	beego.TestBeegoInit(filepath.Dir(pwd))
-	apiURL = "http://api.openweathermap.org/data/2.5/weather?q=%s,%s&units=metric&appid=" + beego.AppConfig.String("appid")
+	ctx := context.Background()
+	defer teardown(ctx)
+	ws := services.NewWeatherService(db, nil)
+	if ws.Database == nil {
+		t.Errorf("NewWeatherService want %v, got %v", db, nil)
+	}
 }
 
-func TestGet(t *testing.T) {
-	Convey("Given a city and a country", t, func() {
-		var ws WeatherService
-		Convey("It should make the corresponding API call", func() {
-			w, err := ws.Get(testCity, testCountry)
-			So(err, ShouldBeNil)
-			So(w.LocationName, ShouldEqual, testLocationName)
-		})
-		Convey("It should return a 404 status code if the city/country is not found", func() {
-			w, err := ws.Get("abc", "123")
-			So(w, ShouldBeNil)
-			So(err.StatusCode, ShouldEqual, 404)
-		})
+func TestGetByLocation(t *testing.T) {
+	db, teardown, err := setup()
+	if err != nil {
+		panic(err)
+	}
+	ctx := context.Background()
+	defer teardown(ctx)
+
+	ws := services.NewWeatherService(db, nil)
+
+	t.Run("Success", func(t *testing.T) {
+		tests := []struct {
+			name  string
+			input string
+		}{
+			{"Bogotá", "Bogotá, CO"},
+			{"Paris", "Paris, FR"},
+		}
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				w, err := ws.GetByLocation(tt.input)
+				if err != nil {
+					t.Errorf("GetByLocation err = %v, want %v", err, nil)
+				}
+				if w == nil {
+					t.Errorf("GetByLocation = %v, want *Weather", w)
+				}
+			})
+		}
+	})
+
+	t.Run("Error", func(t *testing.T) {
+		tests := []struct {
+			name  string
+			input string
+		}{
+			{"Buenos Aires", "Buenos Aires, AR"},
+			{"Lima", "Lima, PE"},
+		}
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				w, err := ws.GetByLocation(tt.input)
+				if err == nil {
+					t.Errorf("GetByLocation err = %v, want APIError", err)
+				}
+				if w != nil {
+					t.Errorf("GetByLocation = %v, want %v", w, nil)
+				}
+			})
+		}
+	})
+
+}
+
+func TestSave(t *testing.T) {
+	db, teardown, err := setup()
+	if err != nil {
+		panic(err)
+	}
+	ctx := context.Background()
+	defer teardown(ctx)
+	ws := services.NewWeatherService(db, nil)
+
+	t.Run("Success", func(t *testing.T) {
+		testWeather := testdata.SampleWeather
+		id := primitive.NewObjectID()
+		testWeather.ID = id
+		res, err := ws.Save(&testWeather)
+		if err != nil {
+			t.Errorf("Save error = %v, want %v", err, nil)
+		}
+		if res.InsertedID != id {
+			t.Errorf("Save InsertedID = %v, want %v", res.InsertedID, id)
+		}
+	})
+}
+
+func TestUpdate(t *testing.T) {
+	db, teardown, err := setup()
+	if err != nil {
+		panic(err)
+	}
+	ctx := context.Background()
+	defer teardown(ctx)
+	ws := services.NewWeatherService(db, nil)
+
+	t.Run("Success", func(t *testing.T) {
+		testWeather := testdata.TestWeathers[0]
+		testWeather.Temperature = "20 °C"
+		res, err := ws.Update(&testWeather)
+		if err != nil {
+			t.Errorf("Update error = %v, want %v", err, nil)
+		}
+		if res.ModifiedCount != 1 {
+			t.Errorf("Update ModifiedCount = %v, want %v", res.ModifiedCount, 1)
+		}
 	})
 }
