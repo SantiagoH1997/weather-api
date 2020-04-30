@@ -1,4 +1,4 @@
-package services_test
+package testutils
 
 import (
 	"context"
@@ -16,9 +16,10 @@ import (
 )
 
 var (
-	mongoURI   string
-	dbName     string
-	apiURL     string
+	mongoURI string
+	dbName   string
+	// APIURL is the URL for the third party API
+	APIURL     string
 	collection = "weather"
 )
 
@@ -28,13 +29,14 @@ func init() {
 		panic(err)
 	}
 	beego.TestBeegoInit(filepath.Dir(pwd))
-	mongoURI = beego.AppConfig.String("mongoTestHost")
 	mongoURI = fmt.Sprintf("mongodb://%s:%s", beego.AppConfig.String("mongoTestHost"), beego.AppConfig.String("mongoPort"))
 	dbName = beego.AppConfig.String("mongoTestDBName")
-	apiURL = "http://api.openweathermap.org/data/2.5/weather?q=%s,%s&units=metric&appid=" + beego.AppConfig.String("appid")
+	APIURL = "http://api.openweathermap.org/data/2.5/weather?q=%s,%s&units=metric&appid=" + beego.AppConfig.String("appid")
 }
 
-func setup() (*mongo.Database, func(ctx context.Context) error, error) {
+// Setup connects to the DB and seeds it.
+// It returns a connection to the DB, a function that closes the connection, and an error
+func Setup() (*mongo.Database, func(ctx context.Context) error, error) {
 	database, close, err := db.Open(mongoURI, dbName)
 	if err != nil {
 		log.Fatalf("Couldn't connect to MongoDB: %v", err.Error())
@@ -43,13 +45,13 @@ func setup() (*mongo.Database, func(ctx context.Context) error, error) {
 	if _, err := database.Collection(collection).DeleteMany(ctx, bson.M{}); err != nil {
 		log.Fatalf("Error while deleting records from the DB: %v", err.Error())
 	}
-	if err := seed(database, ctx); err != nil {
+	if err := seed(ctx, database); err != nil {
 		log.Fatalf("Error while seeding the DB: %v", err.Error())
 	}
 	return database, close, nil
 }
 
-func seed(db *mongo.Database, ctx context.Context) error {
+func seed(ctx context.Context, db *mongo.Database) error {
 	weathers := testdata.TestWeathers
 	weathersInterface := make([]interface{}, len(weathers))
 	for i, v := range weathers {

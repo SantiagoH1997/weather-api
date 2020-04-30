@@ -11,7 +11,7 @@ var (
 	requestedTime string
 	// TestWeathers is a slice of Weathers to seed the DB
 	TestWeathers []models.Weather
-	// SampleWeather is a sample Weather for testing purpouses
+	// SampleWeather is a sample Weather for testing purposes
 	SampleWeather = models.Weather{
 		LocationName:  "Tokyo, JP",
 		Temperature:   "10 °C",

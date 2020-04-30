@@ -5,7 +5,6 @@ import (
 
 	"github.com/robfig/cron"
 	"github.com/santiagoh1997/weather-api/version-3/utils"
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
 )
 
@@ -13,16 +12,14 @@ import (
 // and performs job related tasks
 type JobService struct {
 	Scheduler *cron.Cron
-	Database  *mongo.Database
 	logger    *zap.SugaredLogger
 	ws        *WeatherService
 }
 
 // NewJobService returns a JobService
-func NewJobService(ws *WeatherService, db *mongo.Database, l *zap.SugaredLogger, c *cron.Cron) *JobService {
+func NewJobService(ws *WeatherService, l *zap.SugaredLogger, c *cron.Cron) *JobService {
 	return &JobService{
 		c,
-		db,
 		l,
 		ws,
 	}
@@ -30,8 +27,7 @@ func NewJobService(ws *WeatherService, db *mongo.Database, l *zap.SugaredLogger,
 
 // NewJob schedules a new job to be performed hourly
 func (js *JobService) NewJob(city, country string) (*cron.EntryID, *utils.APIError) {
-	// Cambiar p/ 1 hora
-	entryID, err := js.Scheduler.AddFunc("*/1 * * * *", func() {
+	entryID, err := js.Scheduler.AddFunc("@hourly", func() {
 		w, apiErr := js.ws.Get(city, country)
 		if apiErr != nil {
 			js.logger.Error(fmt.Sprintf("Scheduled job failed: %s", apiErr.Message))

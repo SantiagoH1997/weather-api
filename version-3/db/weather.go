@@ -10,11 +10,8 @@ import (
 )
 
 var (
-	mongoURI          string
-	dbName            string
 	weatherCollection = "weather"
 	indexKey          = "location_name"
-	client            *mongo.Client
 )
 
 // Open opens a connection to the DB

@@ -16,6 +16,7 @@ import (
 
 func main() {
 	l := logger.NewLogger()
+	defer l.Sync()
 	// DB config
 	var mongoURI string
 	if beego.BConfig.RunMode != "prod" {
@@ -29,15 +30,15 @@ func main() {
 	defer close(context.Background())
 	l.Info("Connected to the DB")
 	// Scheduler
+
 	c := cron.New()
 	c.Start()
 	// Services config
 	ws := services.NewWeatherService(db, l)
-	js := services.NewJobService(ws, db, l, c)
+	js := services.NewJobService(ws, l, c)
 	// Controllers config
 	wc := controllers.NewWeatherController(ws)
 	jc := controllers.NewJobController(js)
-
 	// Router config
 	routers.MapURLs(wc, jc)
 
@@ -45,6 +46,5 @@ func main() {
 		beego.BConfig.WebConfig.DirectoryIndex = true
 		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
 	}
-	defer l.Sync()
 	beego.Run()
 }

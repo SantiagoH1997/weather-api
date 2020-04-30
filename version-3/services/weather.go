@@ -19,7 +19,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var apiURL string
+// APIURL is exported for testing purposes...
+var APIURL string
 
 const (
 	expirationTime   = 300 * time.Second
@@ -29,7 +30,7 @@ const (
 )
 
 func init() {
-	apiURL = "http://api.openweathermap.org/data/2.5/weather?q=%s,%s&units=metric&appid=" + beego.AppConfig.String("appid")
+	APIURL = "http://api.openweathermap.org/data/2.5/weather?q=%s,%s&units=metric&appid=" + beego.AppConfig.String("appid")
 }
 
 // WeatherService interacts with the persistance layer
@@ -52,10 +53,10 @@ func NewWeatherService(db *mongo.Database, l *zap.SugaredLogger) *WeatherService
 // If the Weather is old, it updates it.
 func (ws *WeatherService) Get(city, country string) (*models.Weather, *utils.APIError) {
 	weather, err := ws.GetByLocation(fmt.Sprintf("%s, %s", city, country))
-	url := fmt.Sprintf(apiURL, city, country)
+	url := fmt.Sprintf(APIURL, city, country)
 	if err != nil {
 		if err.StatusCode == http.StatusNotFound {
-			apiRes, apiErr := ws.fetchWeather(url)
+			apiRes, apiErr := ws.FetchWeather(url)
 			if apiErr != nil {
 				return nil, apiErr
 			}
@@ -66,7 +67,7 @@ func (ws *WeatherService) Get(city, country string) (*models.Weather, *utils.API
 	}
 	// If weather report has expired
 	if time.Since(weather.ModifiedAt.Time()) > expirationTime {
-		apiRes, apiErr := ws.fetchWeather(url)
+		apiRes, apiErr := ws.FetchWeather(url)
 		if apiErr != nil {
 			return nil, apiErr
 		}
@@ -134,8 +135,8 @@ func (ws *WeatherService) Update(w *models.Weather) (*mongo.UpdateResult, *utils
 	return res, nil
 }
 
-// fetchWeather fetches a weather report from the API
-func (ws *WeatherService) fetchWeather(url string) (*models.APIResponse, *utils.APIError) {
+// FetchWeather fetches a weather report from the API
+func (ws *WeatherService) FetchWeather(url string) (*models.APIResponse, *utils.APIError) {
 	res, err := http.Get(url)
 	if err != nil {
 		ws.logger.Error(fmt.Sprintf("Error while fetching weather: %s", err.Error()))
