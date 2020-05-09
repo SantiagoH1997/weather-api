@@ -7,7 +7,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// Weather is the struct for the response
+// Weather is the response for GET /weather
+// swagger:response weather
+// in: body
 type Weather struct {
 	ID             primitive.ObjectID `json:"-" bson:"_id,omitempty"`
 	LocationName   string             `json:"location_name" bson:"location_name"`
