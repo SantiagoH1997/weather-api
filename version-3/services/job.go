@@ -26,18 +26,17 @@ func NewJobService(ws *WeatherService, l *zap.SugaredLogger, c *cron.Cron) *JobS
 }
 
 // NewJob schedules a new job to be performed hourly
-func (js *JobService) NewJob(city, country string) (*cron.EntryID, *utils.APIError) {
-	entryID, err := js.Scheduler.AddFunc("@hourly", func() {
+func (js *JobService) NewJob(city, country string) *utils.APIError {
+	if err := js.Scheduler.AddFunc("@hourly", func() {
 		w, apiErr := js.ws.Get(city, country)
 		if apiErr != nil {
 			js.logger.Error(fmt.Sprintf("Scheduled job failed: %s", apiErr.Message))
 			return
 		}
 		js.logger.Infof("Running scheduled job for %s", w.LocationName)
-	})
-	if err != nil {
+	}); err != nil {
 		js.logger.Error(fmt.Sprintf("Failed to schedule new job: %s", err.Error()))
-		return nil, utils.NewInternalServerError()
+		return utils.NewInternalServerError()
 	}
-	return &entryID, nil
+	return nil
 }

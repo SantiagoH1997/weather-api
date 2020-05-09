@@ -30,7 +30,7 @@ func (jc *JobController) Schedule() {
 		jc.ServeJSON()
 		return
 	}
-	if _, apiErr := jc.Service.NewJob(req.City, req.Country); apiErr != nil {
+	if apiErr := jc.Service.NewJob(req.City, req.Country); apiErr != nil {
 		jc.Ctx.Output.SetStatus(apiErr.StatusCode)
 		jc.Data["json"] = apiErr
 		return

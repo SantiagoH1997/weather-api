@@ -31,11 +31,7 @@ func TestNewJob(t *testing.T) {
 	c := cron.New()
 	l := logger.NewLogger()
 	js := services.NewJobService(ws, l, c)
-	entryID, apiErr := js.NewJob("Bogotá", "CO")
-	if apiErr != nil {
+	if apiErr := js.NewJob("Bogotá", "CO"); apiErr != nil {
 		t.Errorf("NewJob err = %v, want %v", err, nil)
-	}
-	if entryID == nil {
-		t.Errorf("NewJob entryID = %v, want *cron.EntryID", entryID)
 	}
 }
