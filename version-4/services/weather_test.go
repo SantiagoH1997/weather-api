@@ -7,6 +7,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
+	"github.com/astaxie/beego"
 	"github.com/santiagoh1997/weather-api/version-4/logger"
 	"github.com/santiagoh1997/weather-api/version-4/services"
 	"github.com/santiagoh1997/weather-api/version-4/testdata"
@@ -187,7 +188,37 @@ func TestGet(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			w, err := ws.Get(tt.city, tt.country)
 			if err != nil {
-				t.Errorf("Get err = %v, want %v", err, nil)
+				t.Fatalf("Get err = %v, want %v", err, nil)
+			}
+			got := w.LocationName
+			if got != tt.want {
+				t.Errorf("Get got = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetFromJSON(t *testing.T) {
+	beego.AppConfig.Set("dataSource", "json")
+	defer beego.AppConfig.Set("dataSource", "DB")
+
+	tests := []struct {
+		name    string
+		city    string
+		country string
+		want    string
+	}{
+		{"Bogotá", "Bogotá", "CO", "Bogotá, CO"},
+		{"Paris", "Paris", "FR", "Paris, FR"},
+	}
+	ws := services.NewWeatherService(nil, nil)
+	services.APIURL = testutils.APIURL
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w, err := ws.Get(tt.city, tt.country)
+			if err != nil {
+				t.Fatalf("Get err = %v, want %v", err, nil)
 			}
 			got := w.LocationName
 			if got != tt.want {

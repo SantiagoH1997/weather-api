@@ -173,7 +173,6 @@ func (ws *WeatherService) FetchWeather(url string) (*models.APIResponse, *utils.
 
 // GetFromJSON gets a weather report from the weather.json file
 func (ws *WeatherService) GetFromJSON(location string) (*models.Weather, *utils.APIError) {
-
 	path := filepath.Join("datasources", "jsondata", "weather.json")
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
