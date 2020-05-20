@@ -17,9 +17,18 @@ go get ./...
 
 ## Usage
 
+Versions 1 and 2:
+
 ```bash
 cd <version name>
 bee run
+```
+
+Versions >= 3:
+
+```bash
+cd <version name>
+docker-compose up
 ```
 
 ## Requirements for each version
