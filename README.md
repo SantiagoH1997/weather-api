@@ -65,8 +65,8 @@ docker-compose up
   Payload: {“city”: $City, “country”: $Country}
   Response: 202
 - Add integration tests ✔️
-- Add a swagger description for the API
-- Add Dockerfile and docker-compose files.
+- Add a swagger description for the API ✔️
+- Add Dockerfile and docker-compose files. ✔️
 
 ### Version 4
 
