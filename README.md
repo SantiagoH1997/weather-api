@@ -64,15 +64,15 @@ docker-compose up
   ```PUT /scheduler/weather
   Payload: {“city”: $City, “country”: $Country}
   Response: 202
-- Add integration tests ✔️
-- Add a swagger description for the API ✔️
+- Add integration tests. ✔️
+- Add a swagger description for the API. ✔️
 - Add Dockerfile and docker-compose files. ✔️
 
 ### Version 4
 
-- Add a second weather provider modifying the less code possible. At the beginning of the program we can choose which provider use based on a configuration variable.
+- Add a second weather provider modifying the less code possible. At the beginning of the program we can choose which provider use based on a configuration variable. ✔️
 - This provider is going to read the weather information from json files. Add some files to support at least two cities.
-  Add integration tests
+  Add integration tests. ✔️
 
 ### Version 5
 
