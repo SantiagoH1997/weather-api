@@ -17,9 +17,18 @@ go get ./...
 
 ## Usage
 
+Versions 1 and 2
+
 ```bash
 cd <version name>
 bee run
+```
+
+Versions >= 3
+
+```bash
+cd <version name>
+docker-compose up
 ```
 
 ## Requirements for each version
@@ -55,6 +64,7 @@ bee run
   ```PUT /scheduler/weather
   Payload: {“city”: $City, “country”: $Country}
   Response: 202
+  ```
 - Add integration tests ✔️
 - Add a swagger description for the API ✔️
 - Add Dockerfile and docker-compose files. ✔️
@@ -67,7 +77,7 @@ bee run
 
 ### Version 5
 
-- Add a pool of 5 workers (go routines) to perform the requests to the external service. If all the workers are busy the originating request should be blocked until one worker is available.
+- Add a pool of 5 workers (go routines) to perform the requests to the external service. If all the workers are busy the originating request should be blocked until one worker is available.✔️
 
 ## License
 

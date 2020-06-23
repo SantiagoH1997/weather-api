@@ -1,0 +1,29 @@
+version: '3.3'
+services:
+  api:
+    container_name: 'api-version-5'
+    build: '.'
+    ports:
+      - '8080:8080'
+    depends_on:
+      - 'mongo'
+    links:
+      - mongo
+    environment:
+      - appname=version-5
+      - httpport=8080
+      - runmode=dev
+      - autorender=false
+      - copyrequestbody=true
+      - EnableDocs=true
+      - appid=1508a9a4840a5574c822d70ca2132032
+      - mongoHost=mongo
+      - mongoTestHost=localhost
+      - mongoPort=27017
+      - mongoDBName=weather_api
+      - mongoTestDBName=weather_api_test
+  mongo:
+    image: 'mongo:latest'
+    container_name: 'mongo-version-5'
+    ports:
+      - '27100:27017'
