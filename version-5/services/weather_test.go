@@ -7,11 +7,12 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"github.com/santiagoh1997/weather-api/version-3/logger"
-	"github.com/santiagoh1997/weather-api/version-3/services"
-	"github.com/santiagoh1997/weather-api/version-3/testdata"
-	"github.com/santiagoh1997/weather-api/version-3/testutils"
-	"github.com/santiagoh1997/weather-api/version-3/utils"
+	"github.com/astaxie/beego"
+	"github.com/santiagoh1997/weather-api/version-5/logger"
+	"github.com/santiagoh1997/weather-api/version-5/services"
+	"github.com/santiagoh1997/weather-api/version-5/testdata"
+	"github.com/santiagoh1997/weather-api/version-5/testutils"
+	"github.com/santiagoh1997/weather-api/version-5/utils"
 )
 
 func TestNewWeatherService(t *testing.T) {
@@ -21,7 +22,7 @@ func TestNewWeatherService(t *testing.T) {
 	}
 	ctx := context.Background()
 	defer teardown(ctx)
-	ws := services.NewWeatherService(db, nil)
+	ws := services.NewWeatherService(db, nil, nil)
 	if ws.Database == nil {
 		t.Errorf("NewWeatherService.Database want %v, got %v", db, nil)
 	}
@@ -35,7 +36,7 @@ func TestGetByLocation(t *testing.T) {
 	ctx := context.Background()
 	defer teardown(ctx)
 
-	ws := services.NewWeatherService(db, nil)
+	ws := services.NewWeatherService(db, nil, nil)
 
 	t.Run("Success", func(t *testing.T) {
 		tests := []struct {
@@ -88,7 +89,7 @@ func TestSave(t *testing.T) {
 	}
 	ctx := context.Background()
 	defer teardown(ctx)
-	ws := services.NewWeatherService(db, nil)
+	ws := services.NewWeatherService(db, nil, nil)
 
 	t.Run("Success", func(t *testing.T) {
 		testWeather := testdata.SampleWeather
@@ -111,7 +112,7 @@ func TestUpdate(t *testing.T) {
 	}
 	ctx := context.Background()
 	defer teardown(ctx)
-	ws := services.NewWeatherService(db, logger.NewLogger())
+	ws := services.NewWeatherService(db, logger.NewLogger(), nil)
 
 	t.Run("Success", func(t *testing.T) {
 		testWeather := testdata.TestWeathers[0]
@@ -140,7 +141,7 @@ func TestFetchWeather(t *testing.T) {
 		{"Abc123", fmt.Sprintf(testutils.APIURL, "Abc123", "NL"), expectedError, ""},
 		{"Def456", fmt.Sprintf(testutils.APIURL, "Def456", "NZ"), expectedError, ""},
 	}
-	ws := services.NewWeatherService(nil, nil)
+	ws := services.NewWeatherService(nil, nil, nil)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w, err := ws.FetchWeather(tt.URL)
@@ -180,7 +181,37 @@ func TestGet(t *testing.T) {
 		{"Paris", "Paris", "FR", "Paris, FR"},
 		{"São Paulo", "São Paulo", "BR", "São Paulo, BR"},
 	}
-	ws := services.NewWeatherService(db, nil)
+	ws := services.NewWeatherService(db, nil, nil)
+	services.APIURL = testutils.APIURL
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w, err := ws.Get(tt.city, tt.country)
+			if err != nil {
+				t.Fatalf("Get err = %v, want %v", err, nil)
+			}
+			got := w.LocationName
+			if got != tt.want {
+				t.Errorf("Get got = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetFromJSON(t *testing.T) {
+	beego.AppConfig.Set("dataSource", "json")
+	defer beego.AppConfig.Set("dataSource", "DB")
+
+	tests := []struct {
+		name    string
+		city    string
+		country string
+		want    string
+	}{
+		{"Bogotá", "Bogotá", "CO", "Bogotá, CO"},
+		{"Paris", "Paris", "FR", "Paris, FR"},
+	}
+	ws := services.NewWeatherService(nil, nil, nil)
 	services.APIURL = testutils.APIURL
 
 	for _, tt := range tests {

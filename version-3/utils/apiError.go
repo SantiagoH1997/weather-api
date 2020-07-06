@@ -37,7 +37,7 @@ func NewBadRequest(message string) *APIError {
 	}
 }
 
-// NewApiError returns a custom APIError
+// NewAPIError returns a custom APIError
 func NewAPIError(statusCode int, message string) *APIError {
 	return &APIError{
 		statusCode,

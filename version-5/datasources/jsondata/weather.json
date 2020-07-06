@@ -1,0 +1,38 @@
+[
+  {
+    "location_name": "Bogotá, CO",
+    "temperature": "19 °C",
+    "wind": "5.1 m/s",
+    "cloudiness": "75%",
+    "pressure": "1028 hpa",
+    "humidity": "55%",
+    "sunrise": "10:42",
+    "sunset": "11:03",
+    "geo_coordinates": [4.61, -74.08],
+    "requested_time": "2020-05-18 18:51:30"
+  },
+  {
+    "location_name": "Paris, FR",
+    "temperature": "21.54 °C",
+    "wind": "3.1 m/s",
+    "cloudiness": "0%",
+    "pressure": "1024 hpa",
+    "humidity": "35%",
+    "sunrise": "04:04",
+    "sunset": "07:29",
+    "geo_coordinates": [48.85, 2.35],
+    "requested_time": "2020-05-18 19:15:31"
+  },
+  {
+    "location_name": "Amsterdam, NL",
+    "temperature": "14.44 °C",
+    "wind": "3.1 m/s",
+    "cloudiness": "95%",
+    "pressure": "1022 hpa",
+    "humidity": "71%",
+    "sunrise": "03:40",
+    "sunset": "07:33",
+    "geo_coordinates": [52.37, 4.89],
+    "requested_time": "2020-05-18 19:15:47"
+  }
+]

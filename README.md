@@ -76,7 +76,7 @@ docker-compose up
 
 ### Version 5
 
-- Add a pool of 5 workers (go routines) to perform the requests to the external service. If all the workers are busy the originating request should be blocked until one worker is available.
+- Add a pool of 5 workers (go routines) to perform the requests to the external service. If all the workers are busy the originating request should be blocked until one worker is available.✔️
 
 ## License
 
